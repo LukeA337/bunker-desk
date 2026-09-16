@@ -1,3 +1,8 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Stemline Bunker Desk</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -327,6 +332,9 @@
   .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--caution); animation: pulse 1.1s ease-in-out infinite; }
   @keyframes pulse { 0%,100% { opacity: .25; } 50% { opacity: 1; } }
 </style>
+<style>html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
 
 <header class="topbar">
   <div class="topbar-in">
@@ -418,7 +426,217 @@
   </div>
 </div>
 
-<script src="engine.js"></script>
+<script>
+/* Bunker pricing engine — deterministic, no LLM anywhere near it.
+   Normalizes heterogeneous vendor quotes to a comparable total delivered cost.
+   Loaded as a classic script (defines window.BunkerEngine); also CommonJS-exportable for tests. */
+(function (root) {
+  'use strict';
+
+  /* ---- Configurable reference data -------------------------------------- */
+
+  /* Density in MT per m3 at 15C. Shown in the UI wherever a conversion is applied —
+     an assumption the trader can see is an assumption the trader can correct. */
+  var DENSITY = {
+    VLSFO: 0.945, HSFO: 0.991, ULSFO: 0.930,
+    MGO: 0.860, LSMGO: 0.860, MDO: 0.890, B24: 0.940
+  };
+
+  /* Quoted currency -> USD. Configured per enquiry, not fetched. */
+  var FX = { USD: 1, EUR: 1.08, GBP: 1.27, SGD: 0.74, AED: 0.272 };
+
+  /* Fee profiles fill in what a vendor omitted ("usual fees apply").
+     Everything resolved from here is flagged isEstimate and rendered as an estimate. */
+  var FEE_PROFILES = {
+    'NLRTM|VLSFO': [
+      { label: 'Barge delivery',      basis: 'lumpsum',    amount: 4200, currency: 'USD' },
+      { label: 'Wharfage',            basis: 'per_unit',   amount: 1.15, currency: 'USD' },
+      { label: 'Pumping / hose',      basis: 'lumpsum',    amount: 900,  currency: 'USD' },
+      { label: 'Sampling & testing',  basis: 'lumpsum',    amount: 400,  currency: 'USD' },
+      { label: 'Environmental levy',  basis: 'percentage', amount: 0.9,  appliesTo: 'subtotal' }
+    ],
+    'NLRTM|MGO': [
+      { label: 'Barge delivery',      basis: 'lumpsum',    amount: 1800, currency: 'USD' },
+      { label: 'Wharfage',            basis: 'per_unit',   amount: 1.15, currency: 'USD' },
+      { label: 'Sampling & testing',  basis: 'lumpsum',    amount: 400,  currency: 'USD' },
+      { label: 'Environmental levy',  basis: 'percentage', amount: 0.9,  appliesTo: 'subtotal' }
+    ]
+  };
+
+  function density(grade) { return DENSITY[grade] || 0.95; }
+  function fx(currency) { var r = FX[currency]; return typeof r === 'number' ? r : 1; }
+  function toUsd(amount, currency) { return amount * fx(currency); }
+
+  /* Stem quantity always normalized to MT before anything is amortized over it. */
+  function stemToMt(quantity, unit, grade) {
+    return unit === 'm3' ? quantity * density(grade) : quantity;
+  }
+
+  /* A per-unit figure quoted in USD/m3 becomes USD/MT by DIVIDING by density:
+     one tonne occupies more than one cubic metre for every marine grade. */
+  function perUnitToUsdPerMt(amount, currency, unit, grade) {
+    var usd = toUsd(amount, currency);
+    return unit === 'm3' ? usd / density(grade) : usd;
+  }
+
+  function lookupProfile(port, grade) {
+    return FEE_PROFILES[port + '|' + grade] || null;
+  }
+
+  /* ---- The pipeline ------------------------------------------------------
+     1 currency normalize -> 2 unit normalize -> 3 resolve omitted fees from profile
+     -> 4 amortize lumpsums over the stem -> 5 apply percentages to the subtotal
+     -> 6 total -> (ranking happens in rankQuotes)                            */
+
+  function computeLine(input) {
+    var grade = input.grade;
+    var stemMt = stemToMt(input.quantity, input.quantity_unit || 'mt', grade);
+    var trail = [];
+
+    /* 1+2 — base product */
+    var basePerMt = perUnitToUsdPerMt(
+      input.basePrice, input.currency || 'USD', input.priceUnit || 'mt', grade
+    );
+    var converted = (input.priceUnit === 'm3') || ((input.currency || 'USD') !== 'USD');
+    trail.push({
+      label: 'Base product', rawLabel: input.baseRawLabel || null, basis: 'per_unit',
+      rawAmount: input.basePrice, rawCurrency: input.currency || 'USD',
+      rawUnit: input.priceUnit || 'mt',
+      usdPerMt: basePerMt, usdTotal: basePerMt * stemMt,
+      isEstimate: false, converted: converted,
+      note: input.priceUnit === 'm3'
+        ? 'Converted at ' + density(grade).toFixed(3) + ' MT/m3'
+        : null
+    });
+
+    /* 3 — anything the vendor didn't quote comes from the fee profile, as an estimate */
+    var components = (input.components || []).slice();
+    var estimated = false;
+    if (input.assumeFees && components.length === 0) {
+      var profile = lookupProfile(input.port, grade);
+      if (profile) {
+        estimated = true;
+        components = profile.map(function (c) {
+          return {
+            label: c.label, basis: c.basis, amount: c.amount,
+            currency: c.currency, appliesTo: c.appliesTo,
+            isEstimate: true, rawLabel: input.assumeFeesRawLabel || null
+          };
+        });
+      }
+    }
+
+    /* 4 — absolutes first: per-unit as quoted, lumpsums amortized over the stem */
+    var absolutesPerMt = 0;
+    components.forEach(function (c) {
+      if (c.basis === 'percentage') return;
+      var perMt;
+      if (c.basis === 'lumpsum') {
+        perMt = toUsd(c.amount, c.currency || 'USD') / stemMt;
+      } else {
+        perMt = perUnitToUsdPerMt(c.amount, c.currency || 'USD', c.unit || 'mt', grade);
+      }
+      absolutesPerMt += perMt;
+      trail.push({
+        label: c.label, rawLabel: c.rawLabel || null, basis: c.basis,
+        rawAmount: c.amount, rawCurrency: c.currency || 'USD', rawUnit: c.unit || 'mt',
+        usdPerMt: perMt, usdTotal: perMt * stemMt,
+        isEstimate: !!c.isEstimate, converted: (c.unit === 'm3'),
+        note: c.basis === 'lumpsum'
+          ? 'Lumpsum over ' + fmtQty(stemMt) + ' MT'
+          : null
+      });
+      if (c.isEstimate) estimated = true;
+    });
+
+    /* 5 — percentages apply to the subtotal, never compounding on each other */
+    var subtotalPerMt = basePerMt + absolutesPerMt;
+    var percentPerMt = 0;
+    components.forEach(function (c) {
+      if (c.basis !== 'percentage') return;
+      var applyTo = c.appliesTo === 'base' ? basePerMt : subtotalPerMt;
+      var perMt = applyTo * (c.amount / 100);
+      percentPerMt += perMt;
+      trail.push({
+        label: c.label, rawLabel: c.rawLabel || null, basis: 'percentage',
+        rawAmount: c.amount, rawCurrency: '%', rawUnit: null,
+        usdPerMt: perMt, usdTotal: perMt * stemMt,
+        isEstimate: !!c.isEstimate, converted: false,
+        note: c.amount + '% of ' + (c.appliesTo === 'base' ? 'base price' : 'subtotal')
+      });
+      if (c.isEstimate) estimated = true;
+    });
+
+    /* 6 — total cost for THIS parcel; the unit rate is derived from it, never the reverse */
+    var totalPerMt = subtotalPerMt + percentPerMt;
+
+    return {
+      grade: grade,
+      stemMt: stemMt,
+      headlinePrice: input.basePrice,          // what the eye sees in the email
+      headlineUnit: (input.currency || 'USD') + '/' + (input.priceUnit || 'mt'),
+      basePerMt: basePerMt,
+      feesPerMt: absolutesPerMt + percentPerMt,
+      totalPerMt: totalPerMt,
+      totalCost: totalPerMt * stemMt,
+      isEstimate: estimated,
+      trail: trail
+    };
+  }
+
+  /* Ranking: cheapest TOTAL first. Ties broken by the quote that stays alive longest. */
+  function rankQuotes(lines) {
+    return lines.slice().sort(function (a, b) {
+      var d = a.totalCost - b.totalCost;
+      if (Math.abs(d) > 0.005) return d;
+      return (b.validUntil || 0) - (a.validUntil || 0);
+    });
+  }
+
+  /* What a trader eyeballing the email would have ranked on — used by the
+     "rank by headline price" toggle to show the mistake the manual process makes. */
+  function rankByHeadline(lines) {
+    return lines.slice().sort(function (a, b) {
+      return a.headlinePrice - b.headlinePrice;
+    });
+  }
+
+  function applyMargin(costPerMt, stemMt, rule) {
+    var marginPerMt;
+    if (!rule) marginPerMt = 0;
+    else if (rule.basis === 'percentage') marginPerMt = costPerMt * (rule.value / 100);
+    else if (rule.basis === 'lumpsum') marginPerMt = rule.value / stemMt;
+    else marginPerMt = rule.value;
+    return {
+      marginPerMt: marginPerMt,
+      marginTotal: marginPerMt * stemMt,
+      sellPerMt: costPerMt + marginPerMt,
+      sellTotal: (costPerMt + marginPerMt) * stemMt
+    };
+  }
+
+  /* ---- Formatting shared by engine notes and UI -------------------------- */
+
+  function fmtMoney(n) {
+    return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function fmtQty(n) {
+    return n.toLocaleString('en-US', { maximumFractionDigits: n % 1 ? 1 : 0 });
+  }
+
+  var api = {
+    DENSITY: DENSITY, FX: FX, FEE_PROFILES: FEE_PROFILES,
+    density: density, stemToMt: stemToMt, perUnitToUsdPerMt: perUnitToUsdPerMt,
+    lookupProfile: lookupProfile, computeLine: computeLine,
+    rankQuotes: rankQuotes, rankByHeadline: rankByHeadline,
+    applyMargin: applyMargin, fmtMoney: fmtMoney, fmtQty: fmtQty
+  };
+
+  root.BunkerEngine = api;
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
 <script>
 (function () {
   'use strict';
@@ -1054,3 +1272,6 @@
   renderFeed(); syncTabs(); run();
 })();
 </script>
+
+</body>
+</html>
