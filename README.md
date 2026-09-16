@@ -3,7 +3,7 @@
 Back-to-back bunker trading desk: watches an Outlook mailbox, parses vendor quotes in any format,
 normalizes them to true delivered cost, and sends the client quote as a threaded reply.
 
-Stack: Next.js (App Router) · Microsoft Graph (delegated) · Neon Postgres · Claude Opus 5 · Vercel.
+Stack: Next.js (App Router) · Microsoft Graph (delegated) · Neon Postgres · Claude or OpenAI · Vercel.
 
 ---
 
@@ -76,12 +76,26 @@ No psql? Paste `schema.sql` into Neon's SQL Editor.
 
 ---
 
-## Part 3 — Anthropic API key
+## Part 3 — An LLM key (either provider)
 
-Get one at [console.anthropic.com](https://console.anthropic.com) → `ANTHROPIC_API_KEY`.
+The app is provider-agnostic. Pick one:
 
-Budget sanity: a vendor quote is roughly 500 input / 400 output tokens, so Claude Opus 5 costs about
-**1.3 cents per quote parsed**. A busy desk day is a few dollars.
+| Provider | Key from | Default model | Override |
+|---|---|---|---|
+| Anthropic | [console.anthropic.com](https://console.anthropic.com) → `ANTHROPIC_API_KEY` | `claude-opus-5` | `ANTHROPIC_MODEL` |
+| OpenAI | [platform.openai.com](https://platform.openai.com) → `OPENAI_API_KEY` | `gpt-5.6-terra` | `OPENAI_MODEL` |
+
+Set one key and the provider is auto-detected. Set both and `LLM_PROVIDER` decides
+(`anthropic` or `openai`); without it Anthropic wins and the server logs a warning.
+
+**Why swapping is safe.** The model only ever does extraction — it reads an email and returns
+structured data. Pricing is deterministic and has no model anywhere in its path, so changing
+provider cannot change a price, only how well the text was read. Both implementations share one
+schema and one prompt (`src/lib/parse/schema.ts`), so they cannot drift apart.
+
+Budget sanity: a vendor quote is roughly 500 input / 400 output tokens — around **1.3 cents per
+quote** on Claude Opus 5, less on the mid-tier models. A busy desk day is a few dollars either way,
+which is why accuracy is the thing to optimise here, not price.
 
 ---
 
@@ -140,7 +154,7 @@ Container Apps). Nothing else changes. That is the one thing to swap before this
 src/lib/engine.ts   deterministic pricing — no LLM, fully unit-tested (npm test)
 src/lib/graph.ts    Microsoft Graph: delta poll, message fetch, createReply + send
 src/lib/auth.ts     MSAL confidential client, auth-code flow, refresh-token storage
-src/lib/parse.ts    Claude Opus 5, structured outputs, one call per vendor block
+src/lib/parse/      provider-agnostic extraction (Claude or OpenAI, one schema)
 src/lib/db.ts       Neon Postgres
 src/app/api/…       signin · callback · poll · parse · send
 ```
