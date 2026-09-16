@@ -1,0 +1,1056 @@
+<title>Stemline Bunker Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  /* Palette: Admiralty chart conventions — sea-ink near-black, cool chart paper,
+     and magenta as the caution/notice colour, which is what magenta means on a real chart. */
+  :root {
+    --ink:        #10202B;
+    --ink-2:      #40555F;
+    --ink-3:      #6B808A;
+    --paper:      #E9EEEE;
+    --surface:    #FFFFFF;
+    --surface-2:  #F4F7F7;
+    --rule:       #C6D2D4;
+    --rule-soft:  #DCE5E6;
+    --caution:    #C3106B;
+    --firm:       #0B6E5A;
+    --firm-bg:    #E2F1EC;
+    --est:        #9A5E06;
+    --est-bg:     #FBEEDA;
+    --expired:    #A2202B;
+    --expired-bg: #F7E3E4;
+    --bar-bg:     #10202B;
+    --bar-fg:     #E9EEEE;
+    --bar-line:   rgba(233,238,238,.28);
+    --shadow:     0 1px 2px rgba(16,32,43,.07), 0 6px 18px rgba(16,32,43,.06);
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --ui: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink:        #DFE9E9;
+      --ink-2:      #9FB2B8;
+      --ink-3:      #74898F;
+      --paper:      #0A141A;
+      --surface:    #121F27;
+      --surface-2:  #17272F;
+      --rule:       #2A3C45;
+      --rule-soft:  #1E2E36;
+      --caution:    #FF62AC;
+      --firm:       #3CC69C;
+      --firm-bg:    #123028;
+      --est:        #E5A33C;
+      --est-bg:     #33260E;
+      --expired:    #FF6F74;
+      --expired-bg: #351618;
+      --bar-bg:     #050D11;
+      --bar-fg:     #DFE9E9;
+      --bar-line:   rgba(223,233,233,.22);
+      --shadow:     0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink:#DFE9E9; --ink-2:#9FB2B8; --ink-3:#74898F; --paper:#0A141A;
+    --surface:#121F27; --surface-2:#17272F; --rule:#2A3C45; --rule-soft:#1E2E36;
+    --caution:#FF62AC; --firm:#3CC69C; --firm-bg:#123028; --est:#E5A33C;
+    --est-bg:#33260E; --expired:#FF6F74; --expired-bg:#351618;
+    --bar-bg:#050D11; --bar-fg:#DFE9E9; --bar-line:rgba(223,233,233,.22);
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.3);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--paper); color: var(--ink);
+    font-family: var(--ui); font-size: 14px; line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,h2,h3 { margin: 0; text-wrap: balance; font-weight: 600; letter-spacing: -.01em; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--caution); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+  .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .lbl {
+    font-size: 10px; font-weight: 600; letter-spacing: .11em;
+    text-transform: uppercase; color: var(--ink-3);
+  }
+
+  /* ---- chrome ---- */
+  .topbar {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30;
+    background: var(--bar-bg); color: var(--bar-fg);
+    border-bottom: 1px solid var(--rule);
+  }
+  .topbar-in {
+    max-width: 1320px; margin: 0 auto; padding-block: 10px; padding-inline: 16px;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: baseline; gap: 9px; margin-right: auto; }
+  .brand b { font-size: 15px; font-weight: 700; letter-spacing: .01em; }
+  .brand span { font-size: 10.5px; letter-spacing: .13em; text-transform: uppercase; opacity: .6; }
+  .clock { display: flex; align-items: baseline; gap: 7px; }
+  .clock .lbl { color: var(--bar-fg); opacity: .55; }
+  .clock .v { font-family: var(--mono); font-size: 15px; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .tbtn {
+    background: transparent; border: 1px solid var(--bar-line);
+    color: inherit; padding: 6px 13px; border-radius: 3px;
+    font-size: 12.5px; font-weight: 500;
+  }
+  .tbtn:hover { border-color: var(--bar-fg); }
+  .tbtn.go { background: var(--caution); border-color: var(--caution); color: #fff; font-weight: 600; }
+  .tbtn.go:hover { filter: brightness(1.08); }
+  .tbtn[disabled] { opacity: .35; cursor: default; }
+
+  .wrap {
+    max-width: 1320px; margin: 0 auto; padding-inline: 16px; padding-block: 18px 56px;
+    display: grid; grid-template-columns: 296px minmax(0,1fr); gap: 18px; align-items: start;
+  }
+  @media (max-width: 980px) { .wrap { grid-template-columns: minmax(0,1fr); } }
+
+  .panel {
+    background: var(--surface); border: 1px solid var(--rule-soft);
+    border-radius: 4px; box-shadow: var(--shadow);
+  }
+  .panel-hd {
+    display: flex; align-items: center; gap: 9px;
+    padding: 10px 13px; border-bottom: 1px solid var(--rule-soft);
+  }
+  .panel-hd .lbl { margin-right: auto; }
+  .col { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+
+  /* ---- inbox rail ---- */
+  .feed { max-height: 460px; overflow-y: auto; }
+  .msg {
+    display: block; width: 100%; text-align: left; background: transparent;
+    border: 0; border-bottom: 1px solid var(--rule-soft);
+    padding: 10px 13px; display: grid; gap: 3px;
+  }
+  .msg:hover { background: var(--surface-2); }
+  .msg[aria-expanded="true"] { background: var(--surface-2); }
+  .msg-top { display: flex; align-items: baseline; gap: 8px; }
+  .msg-from { font-weight: 600; font-size: 12.5px; flex: 1; min-width: 0;
+              overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .msg-time { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+  .msg-sub { font-size: 12px; color: var(--ink-2); overflow: hidden;
+             text-overflow: ellipsis; white-space: nowrap; }
+  .msg-kind {
+    font-size: 9.5px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
+    padding: 1px 5px; border-radius: 2px; align-self: flex-start;
+  }
+  .k-enq { background: var(--est-bg); color: var(--est); }
+  .k-quo { background: var(--firm-bg); color: var(--firm); }
+  .k-out { background: var(--expired-bg); color: var(--expired); }
+  .raw {
+    font-family: var(--mono); font-size: 11.5px; line-height: 1.62;
+    white-space: pre-wrap; padding: 11px 13px; margin: 0;
+    background: var(--surface-2); border-bottom: 1px solid var(--rule-soft);
+    color: var(--ink-2); overflow-x: auto;
+  }
+  .feed-empty { padding: 22px 13px; color: var(--ink-3); font-size: 12.5px; }
+
+  /* ---- enquiry ---- */
+  .enq-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+    gap: 1px; background: var(--rule-soft);
+  }
+  .enq-cell { background: var(--surface); padding: 10px 13px; display: grid; gap: 2px; }
+  .enq-cell .v { font-family: var(--mono); font-size: 13.5px; font-weight: 500; }
+  .stems { display: flex; flex-wrap: wrap; gap: 8px; padding: 11px 13px; border-top: 1px solid var(--rule-soft); }
+  .stem {
+    display: flex; align-items: baseline; gap: 7px; padding: 5px 10px;
+    border: 1px solid var(--rule); border-radius: 3px; background: var(--surface-2);
+  }
+  .stem b { font-family: var(--mono); font-size: 13px; font-weight: 600; }
+  .stem span { font-size: 11.5px; color: var(--ink-2); }
+
+  /* ---- controls ---- */
+  .bar {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    padding: 9px 13px; border-bottom: 1px solid var(--rule-soft);
+  }
+  .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; }
+  .seg button {
+    background: var(--surface); border: 0; padding: 5px 11px;
+    font-size: 12px; font-weight: 500; color: var(--ink-2);
+    border-right: 1px solid var(--rule);
+  }
+  .seg button:last-child { border-right: 0; }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); font-weight: 600; }
+  .seg.warnmode button[aria-pressed="true"] { background: var(--caution); color: #fff; }
+
+  /* ---- comparison grid ---- */
+  .gridhd, .qrow-main {
+    display: grid;
+    grid-template-columns: 30px minmax(120px,1.5fr) 96px 104px 116px 92px 30px;
+    gap: 10px; align-items: center;
+  }
+  .gridhd { padding: 7px 13px; border-bottom: 1px solid var(--rule); }
+  .gridhd .lbl { font-size: 9.5px; }
+  .ar { text-align: right; }
+  .qrow { border-bottom: 1px solid var(--rule-soft); }
+  .qrow:last-child { border-bottom: 0; }
+  .qrow.best .qrow-main { background: linear-gradient(90deg, var(--firm-bg), transparent 62%); }
+  .qrow.dead { opacity: .5; }
+  .qrow-main {
+    width: 100%; background: transparent; border: 0; text-align: left;
+    padding: 11px 13px; border-left: 3px solid transparent;
+  }
+  .qrow.best .qrow-main { border-left-color: var(--firm); }
+  .qrow.dead .qrow-main { border-left-color: var(--expired); }
+  .qrow-main:hover { background: var(--surface-2); }
+  .rank { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--ink-3); }
+  .qrow.best .rank { color: var(--firm); }
+  .vname { font-weight: 600; font-size: 13.5px; }
+  .vmeta { font-size: 11px; color: var(--ink-3); margin-top: 1px; }
+  .headline { font-family: var(--mono); font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .permt { font-family: var(--mono); font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .total { font-family: var(--mono); font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .delta { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+  .cd { font-family: var(--mono); font-size: 13.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .cd.warn { color: var(--est); }
+  .cd.crit { color: var(--expired); }
+  .caret { color: var(--ink-3); font-size: 11px; transition: transform .15s; }
+  .qrow[data-open="true"] .caret { transform: rotate(90deg); }
+  .mlbl { display: none; }
+
+  /* Phone: the grid restacks into a card — column headers travel with each figure. */
+  @media (max-width: 720px) {
+    .gridhd { display: none; }
+    .mlbl {
+      display: block; font-size: 9.5px; font-weight: 600; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--ink-3); margin-bottom: 1px;
+    }
+    .qrow-main {
+      grid-template-columns: 26px minmax(0,1fr) auto 26px;
+      row-gap: 10px; align-items: start; padding: 13px;
+    }
+    .qrow-main > :nth-child(1) { grid-area: 1 / 1 / 2 / 2; }
+    .qrow-main > :nth-child(2) { grid-area: 1 / 2 / 2 / 4; }
+    .qrow-main > :nth-child(7) { grid-area: 1 / 4 / 2 / 5; justify-self: end; }
+    .qrow-main > :nth-child(4) { grid-area: 2 / 2 / 3 / 3; text-align: left; }
+    .qrow-main > :nth-child(3) { grid-area: 2 / 3 / 3 / 5; }
+    .qrow-main > :nth-child(5) { grid-area: 3 / 2 / 4 / 3; text-align: left; }
+    .qrow-main > :nth-child(6) { grid-area: 3 / 3 / 4 / 5; }
+    .trail { padding-left: 13px; overflow-x: auto; }
+    .trail table { min-width: 430px; }
+  }
+
+  .badges { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 4px; }
+  .badge {
+    font-size: 9.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+    padding: 1.5px 5px; border-radius: 2px; white-space: nowrap;
+  }
+  .b-est { background: var(--est-bg); color: var(--est); }
+  .b-conv { background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--rule); }
+  .b-firm { background: var(--firm-bg); color: var(--firm); }
+  .b-dead { background: var(--expired-bg); color: var(--expired); }
+
+  /* ---- audit trail ---- */
+  .trail { padding: 0 13px 13px 46px; background: var(--surface-2); }
+  .trail table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .trail th {
+    text-align: left; padding: 7px 8px 5px 0; border-bottom: 1px solid var(--rule);
+    font-size: 9.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3);
+  }
+  .trail th.ar, .trail td.ar { text-align: right; padding-right: 0; }
+  .trail td { padding: 6px 8px 6px 0; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
+  .trail tr.sum td { font-weight: 700; border-bottom: 0; border-top: 2px solid var(--rule); }
+  .trail .q { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .trail .note { display: block; font-size: 10.5px; color: var(--ink-3); margin-top: 1px; }
+  .trail .rawlbl { display: block; font-size: 10.5px; color: var(--ink-3); font-family: var(--mono); margin-top: 1px; }
+  .trail-act { display: flex; gap: 8px; flex-wrap: wrap; padding-top: 11px; }
+  .btn {
+    border: 1px solid var(--rule); background: var(--surface); border-radius: 3px;
+    padding: 6px 13px; font-size: 12.5px; font-weight: 500;
+  }
+  .btn:hover { border-color: var(--ink-3); }
+  .btn.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); font-weight: 600; }
+  .btn.primary:hover { filter: brightness(1.15); }
+  .btn.send { background: var(--caution); border-color: var(--caution); color: #fff; font-weight: 600; }
+  .btn.send:hover { filter: brightness(1.08); }
+  .btn[disabled] { opacity: .4; cursor: default; filter: none; }
+
+  .unmapped {
+    margin-top: 9px; padding: 8px 10px; border-left: 3px solid var(--est);
+    background: var(--est-bg); color: var(--est); font-size: 11.5px; border-radius: 0 3px 3px 0;
+  }
+  .unmapped code { font-family: var(--mono); }
+
+  /* ---- notice ---- */
+  .notice {
+    display: flex; gap: 10px; padding: 11px 13px; font-size: 12.5px;
+    border-left: 3px solid var(--caution); background: var(--surface-2); color: var(--ink-2);
+  }
+  .notice b { color: var(--caution); }
+
+  /* ---- basket ---- */
+  .basket { display: grid; gap: 1px; background: var(--rule-soft); }
+  .bk { background: var(--surface); padding: 11px 13px; display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+  .bk .who { font-weight: 600; font-size: 13px; flex: 1; min-width: 140px; }
+  .bk .fig { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 13.5px; }
+
+  /* ---- composer ---- */
+  .comp-grid { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.2fr); gap: 1px; background: var(--rule-soft); }
+  @media (max-width: 760px) { .comp-grid { grid-template-columns: minmax(0,1fr); } }
+  .comp-side, .comp-main { background: var(--surface); padding: 13px; }
+  .field { display: grid; gap: 5px; margin-bottom: 13px; }
+  .field input, .field select, .field textarea {
+    font: inherit; font-family: var(--mono); font-size: 13px;
+    background: var(--surface-2); color: var(--ink);
+    border: 1px solid var(--rule); border-radius: 3px; padding: 7px 9px; width: 100%;
+  }
+  .field textarea { line-height: 1.6; resize: vertical; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+  .figline { display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+             padding: 6px 0; border-bottom: 1px solid var(--rule-soft); }
+  .figline:last-of-type { border-bottom: 0; }
+  .figline .k { font-size: 12px; color: var(--ink-2); }
+  .figline .v { font-family: var(--mono); font-size: 14px; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .figline.big .v { font-size: 19px; font-weight: 700; }
+  .figline.big .k { font-weight: 600; color: var(--ink); }
+  .quotebox {
+    font-family: var(--mono); font-size: 12px; line-height: 1.7; white-space: pre-wrap;
+    background: var(--surface-2); border: 1px solid var(--rule); border-radius: 3px;
+    padding: 12px; overflow-x: auto; min-height: 150px;
+  }
+  .sent {
+    display: flex; gap: 10px; align-items: baseline; padding: 11px 13px;
+    background: var(--firm-bg); color: var(--firm); font-size: 13px; font-weight: 500;
+  }
+  .sent b { font-family: var(--mono); }
+
+  .placeholder { padding: 26px 13px; text-align: center; color: var(--ink-3); font-size: 13px; }
+  .hint { font-size: 11.5px; color: var(--ink-3); }
+  .parsing { display: flex; align-items: center; gap: 9px; padding: 11px 13px; font-size: 12.5px; color: var(--ink-2); }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--caution); animation: pulse 1.1s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity: .25; } 50% { opacity: 1; } }
+</style>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand"><b>Stemline</b><span>Back-to-back bunker desk</span></div>
+    <div class="clock"><span class="lbl">Enquiry age</span><span class="v" id="sessionClock">—:—</span></div>
+    <button class="tbtn go" id="btnRun">Run live enquiry</button>
+    <button class="tbtn" id="btnReset">Reset</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- ══ inbox rail ══ -->
+  <div class="col">
+    <section class="panel">
+      <div class="panel-hd">
+        <span class="lbl">Inbox — desk@dan-bunkering</span>
+        <span class="lbl num" id="msgCount">0</span>
+      </div>
+      <div class="feed" id="feed">
+        <div class="feed-empty">Watching for enquiries. Press <b>Run live enquiry</b> to play a Rotterdam stem through the desk.</div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-hd"><span class="lbl">Parse any vendor quote</span></div>
+      <div style="padding:13px">
+        <p class="hint" style="margin:0 0 9px">Paste a real supplier quote in any format. Claude extracts the price components; the engine prices it against the current stem.</p>
+        <div class="field">
+          <textarea id="pasteBox" rows="5" placeholder="e.g.  Bunker One, Rotterdam&#10;VLSFO 0.50%S base EUR 478.00/mt&#10;barge EUR 3,200 lumpsum, wharfage 1.10/mt&#10;valid 10 mins"></textarea>
+        </div>
+        <div class="row2">
+          <select class="field" id="pasteGrade" style="margin:0" aria-label="Grade">
+            <option value="VLSFO">VLSFO — 850 MT</option>
+            <option value="MGO">MGO — 120 MT</option>
+          </select>
+          <button class="btn primary" id="btnParse">Parse &amp; price</button>
+        </div>
+        <div id="pasteOut" class="hint" style="margin-top:9px"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ══ main ══ -->
+  <div class="col">
+    <section class="panel" id="enqPanel" hidden>
+      <div class="panel-hd">
+        <span class="lbl">Enquiry</span>
+        <span class="badge b-firm" id="enqStatus">Live</span>
+      </div>
+      <div class="enq-grid">
+        <div class="enq-cell"><span class="lbl">Vessel</span><span class="v">MV NORDIC STAR</span></div>
+        <div class="enq-cell"><span class="lbl">IMO</span><span class="v">9847213</span></div>
+        <div class="enq-cell"><span class="lbl">Port</span><span class="v">NLRTM · Rotterdam</span></div>
+        <div class="enq-cell"><span class="lbl">Window</span><span class="v">15–17 Oct 2026</span></div>
+        <div class="enq-cell"><span class="lbl">Agent</span><span class="v">Inchcape</span></div>
+        <div class="enq-cell"><span class="lbl">Client</span><span class="v">Nordic Star A/S</span></div>
+      </div>
+      <div class="stems">
+        <div class="stem"><b>850 MT</b><span>VLSFO RMG380 0.50%S · ±5% MOLOO</span></div>
+        <div class="stem"><b>120 MT</b><span>MGO DMA 0.10%S · ±5% MOLOO</span></div>
+        <div class="stem"><span>Delivery ex-barge · payment 30 days</span></div>
+      </div>
+    </section>
+
+    <section class="panel" id="gridPanel" hidden>
+      <div class="panel-hd"><span class="lbl">Vendor comparison</span></div>
+      <div class="bar">
+        <div class="seg" role="group" aria-label="Grade">
+          <button id="tabVLSFO" aria-pressed="true">VLSFO · 850 MT</button>
+          <button id="tabMGO" aria-pressed="false">MGO · 120 MT</button>
+          <button id="tabBasket" aria-pressed="false">Basket</button>
+        </div>
+        <div class="seg warnmode" role="group" aria-label="Ranking basis" style="margin-left:auto">
+          <button id="rankTrue" aria-pressed="true">True delivered total</button>
+          <button id="rankHead" aria-pressed="false">Headline price as quoted</button>
+        </div>
+      </div>
+      <div id="rankNotice"></div>
+      <div id="gridBody"></div>
+    </section>
+
+    <section class="panel" id="compPanel" hidden>
+      <div class="panel-hd">
+        <span class="lbl">Client quote</span>
+        <span class="badge b-conv" id="compVendor"></span>
+      </div>
+      <div id="compBody"></div>
+    </section>
+  </div>
+</div>
+
+<script src="engine.js"></script>
+<script>
+(function () {
+  'use strict';
+  var E = window.BunkerEngine;
+  var $ = function (id) { return document.getElementById(id); };
+  var money = E.fmtMoney, qty = E.fmtQty;
+
+  /* ══ enquiry + fixtures ═══════════════════════════════════════════════════
+     The four vendor formats a trader actually gets: all-in, itemised with
+     lumpsums, quoted per m3, and base-only with "usual fees apply".        */
+
+  var ENQ = {
+    port: 'NLRTM',
+    lines: { VLSFO: { qty: 850, spec: 'RMG380 0.50%S' }, MGO: { qty: 120, spec: 'DMA 0.10%S' } }
+  };
+
+  var CLIENT_MAIL = {
+    kind: 'enq', from: 'Karin Vestergaard — Nordic Star A/S',
+    subject: 'Bunker enquiry — MV NORDIC STAR / Rotterdam',
+    body:
+'Morning,\n\nPlease quote for our vessel calling Rotterdam:\n\n' +
+'Vessel:  MV NORDIC STAR (IMO 9847213)\n' +
+'Port:    Rotterdam (NLRTM)\n' +
+'ETA:     15 Oct 2026 / ETD 17 Oct 2026\n' +
+'Agent:   Inchcape Shipping Services\n\n' +
+'Qty:     850 MT VLSFO RMG380 0.50%S  +/- 5% MOLOO\n' +
+'         120 MT MGO DMA 0.10%S       +/- 5% MOLOO\n\n' +
+'Delivery ex-barge. Payment 30 days from delivery.\nPlease revert with your best.\n\nBr,\nKarin'
+  };
+
+  var VENDORS = [
+    {
+      id: 'vitol', name: 'Vitol Bunkers BV', note: 'All-in, ex-barge', validMin: 10, confidence: .98,
+      subject: 'RE: NORDIC STAR / RTM — VITOL',
+      body:
+'Vitol Bunkers BV, Rotterdam:\n\n' +
+'VLSFO RMG380 0.50%S ...... USD 534.50 / MT  ALL INCLUSIVE\n' +
+'MGO DMA 0.10%S ........... USD 702.00 / MT  ALL INCLUSIVE\n\n' +
+'Qty 850 / 120 MT +/-5% MOLOO. Delivered ex-barge incl. all port\n' +
+'charges, wharfage, pumping and sampling. Nothing further to add.\n\n' +
+'Validity 10 minutes. Payment 30 days.',
+      lines: {
+        VLSFO: { basePrice: 534.50, baseRawLabel: 'USD 534.50 / MT ALL INCLUSIVE' },
+        MGO:   { basePrice: 702.00, baseRawLabel: 'USD 702.00 / MT ALL INCLUSIVE' }
+      }
+    },
+    {
+      id: 'minerva', name: 'Minerva Bunkering', note: 'Base + 7 line items', validMin: 8, confidence: .93,
+      subject: 'RE: NORDIC STAR / RTM — MINERVA',
+      body:
+'Minerva Bunkering:\n\n' +
+'VLSFO RMG380 0.50%S\n' +
+'  Base price ................ USD 521.00 /MT\n' +
+'  Barge hire ................ USD 3,850.00 lumpsum\n' +
+'  Wharfage .................. USD 1.20 /MT\n' +
+'  Pumping / hose connection . USD 950.00 lumpsum\n' +
+'  Sampling & testing ........ USD 420.00 lumpsum\n' +
+'  Overtime (weekend deliv.) . USD 1,100.00 lumpsum\n' +
+'  Agency .................... USD 0.85 /MT\n' +
+'  Environmental levy ........ 0.9% on subtotal\n\n' +
+'MGO DMA 0.10%S\n' +
+'  Base price ................ USD 688.00 /MT\n' +
+'  Wharfage .................. USD 1.20 /MT\n' +
+'  Agency .................... USD 0.85 /MT\n' +
+'  Environmental levy ........ 0.9% on subtotal\n' +
+'  (no barge - alongside same call)\n\n' +
+'Valid 8 mins from now. 30 days credit. Subject board approval.',
+      unmapped: ['Subject board approval'],
+      lines: {
+        VLSFO: {
+          basePrice: 521.00, baseRawLabel: 'Base price USD 521.00 /MT',
+          components: [
+            { label: 'Barge delivery',     rawLabel: 'Barge hire',                basis: 'lumpsum',    amount: 3850 },
+            { label: 'Wharfage',           rawLabel: 'Wharfage',                  basis: 'per_unit',   amount: 1.20 },
+            { label: 'Pumping / hose',     rawLabel: 'Pumping / hose connection', basis: 'lumpsum',    amount: 950 },
+            { label: 'Sampling & testing', rawLabel: 'Sampling & testing',        basis: 'lumpsum',    amount: 420 },
+            { label: 'Overtime',           rawLabel: 'Overtime (weekend deliv.)', basis: 'lumpsum',    amount: 1100 },
+            { label: 'Agency fee',         rawLabel: 'Agency',                    basis: 'per_unit',   amount: 0.85 },
+            { label: 'Environmental levy', rawLabel: '0.9% on subtotal',          basis: 'percentage', amount: 0.9, appliesTo: 'subtotal' }
+          ]
+        },
+        MGO: {
+          basePrice: 688.00, baseRawLabel: 'Base price USD 688.00 /MT',
+          components: [
+            { label: 'Wharfage',           rawLabel: 'Wharfage',         basis: 'per_unit',   amount: 1.20 },
+            { label: 'Agency fee',         rawLabel: 'Agency',           basis: 'per_unit',   amount: 0.85 },
+            { label: 'Environmental levy', rawLabel: '0.9% on subtotal', basis: 'percentage', amount: 0.9, appliesTo: 'subtotal' }
+          ]
+        }
+      }
+    },
+    {
+      id: 'wfs', name: 'World Fuel Services', note: 'Quoted per m³', validMin: 5, confidence: .91,
+      subject: 'RE: NORDIC STAR / RTM — WFS',
+      body:
+'World Fuel Services Europe:\n\n' +
+'VLSFO 0.50%S - USD 508.00 per m3, delivered ex-barge,\n' +
+'               inclusive of all port charges\n' +
+'MGO 0.10%S   - USD 601.50 per m3, ditto\n\n' +
+'Quantities as enquired. Prices firm 5 minutes only.\nPayment 30 days.',
+      lines: {
+        VLSFO: { basePrice: 508.00, priceUnit: 'm3', baseRawLabel: 'USD 508.00 per m3' },
+        MGO:   { basePrice: 601.50, priceUnit: 'm3', baseRawLabel: 'USD 601.50 per m3' }
+      }
+    },
+    {
+      id: 'peninsula', name: 'Peninsula Petroleum', note: 'Base only — fees assumed', validMin: 12, confidence: .72,
+      subject: 'RE: NORDIC STAR / RTM — PENINSULA',
+      body:
+'Peninsula Petroleum:\n\n' +
+'VLSFO RMG380 0.50%S - USD 519.00/MT\n' +
+'MGO DMA 0.10%S ..... USD 685.00/MT\n\n' +
+'Basis ex-wharf. Usual Rotterdam delivery fees apply as per our\n' +
+'standing terms.\n\nValidity 12 minutes.',
+      unmapped: ['Usual Rotterdam delivery fees apply as per our standing terms'],
+      lines: {
+        VLSFO: { basePrice: 519.00, assumeFees: true, baseRawLabel: 'USD 519.00/MT basis ex-wharf',
+                 assumeFeesRawLabel: 'from "usual Rotterdam fees"' },
+        MGO:   { basePrice: 685.00, assumeFees: true, baseRawLabel: 'USD 685.00/MT basis ex-wharf',
+                 assumeFeesRawLabel: 'from "usual Rotterdam fees"' }
+      }
+    }
+  ];
+
+  /* ══ state ════════════════════════════════════════════════════════════════ */
+
+  var S = {
+    started: null, messages: [], quotes: [], openMsg: null, openRow: null,
+    grade: 'VLSFO', rankBy: 'true', selected: null, sent: null,
+    margin: { basis: 'per_unit', value: 12 }, timers: []
+  };
+
+  function clearTimers() { S.timers.forEach(clearTimeout); S.timers = []; }
+  function later(fn, ms) { S.timers.push(setTimeout(fn, ms)); }
+
+  /* ══ pricing ══════════════════════════════════════════════════════════════ */
+
+  function priceQuote(q, grade) {
+    var spec = q.lines[grade];
+    if (!spec) return null;
+    var res = E.computeLine({
+      grade: grade, quantity: ENQ.lines[grade].qty, port: ENQ.port,
+      basePrice: spec.basePrice, currency: spec.currency || 'USD',
+      priceUnit: spec.priceUnit || 'mt', baseRawLabel: spec.baseRawLabel,
+      components: spec.components, assumeFees: spec.assumeFees,
+      assumeFeesRawLabel: spec.assumeFeesRawLabel
+    });
+    res.vendorId = q.id; res.vendor = q.name; res.note = q.note;
+    res.validUntil = q.validUntil; res.confidence = q.confidence;
+    res.unmapped = q.unmapped || []; res.headlineUnitRaw = spec.priceUnit === 'm3' ? '/m³' : '/MT';
+    return res;
+  }
+
+  function livePriced(grade) {
+    return S.quotes.map(function (q) { return priceQuote(q, grade); }).filter(Boolean);
+  }
+  function isDead(r) { return Date.now() > r.validUntil; }
+
+  /* ══ rendering ════════════════════════════════════════════════════════════ */
+
+  function renderFeed() {
+    var feed = $('feed');
+    $('msgCount').textContent = S.messages.length;
+    if (!S.messages.length) {
+      feed.innerHTML = '<div class="feed-empty">Watching for enquiries. Press <b>Run live enquiry</b> to play a Rotterdam stem through the desk.</div>';
+      return;
+    }
+    feed.innerHTML = '';
+    S.messages.forEach(function (m, i) {
+      var b = document.createElement('button');
+      b.className = 'msg'; b.setAttribute('aria-expanded', S.openMsg === i ? 'true' : 'false');
+      var kindCls = m.kind === 'enq' ? 'k-enq' : m.kind === 'out' ? 'k-out' : 'k-quo';
+      var kindTxt = m.kind === 'enq' ? 'Enquiry' : m.kind === 'out' ? 'Sent' : 'Quote';
+      b.innerHTML =
+        '<div class="msg-top"><span class="msg-from"></span><span class="msg-time num">' + m.time + '</span></div>' +
+        '<div class="msg-sub"></div>' +
+        '<span class="msg-kind ' + kindCls + '">' + kindTxt + '</span>';
+      b.querySelector('.msg-from').textContent = m.from;
+      b.querySelector('.msg-sub').textContent = m.subject;
+      b.onclick = function () { S.openMsg = S.openMsg === i ? null : i; renderFeed(); };
+      feed.appendChild(b);
+      if (S.openMsg === i) {
+        var pre = document.createElement('pre');
+        pre.className = 'raw'; pre.textContent = m.body;
+        feed.appendChild(pre);
+      }
+    });
+  }
+
+  function countdownCls(ms) { return ms <= 0 ? 'crit' : ms < 120000 ? 'crit' : ms < 240000 ? 'warn' : ''; }
+  function countdownTxt(ms) {
+    if (ms <= 0) return 'EXPIRED';
+    var s = Math.floor(ms / 1000);
+    return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+  }
+
+  function renderNotice() {
+    var n = $('rankNotice');
+    if (S.rankBy === 'head') {
+      n.innerHTML = '<div class="notice"><span><b>Headline order is the mistake the manual process makes.</b> ' +
+        'These are the numbers as they appear in the emails — before unit conversion, before lumpsums are ' +
+        'amortised over the stem, before assumed fees. Switch back to see the real order.</span></div>';
+    } else { n.innerHTML = ''; }
+  }
+
+  function renderGrid() {
+    var body = $('gridBody');
+    if (S.grade === 'basket') return renderBasket();
+
+    var rows = livePriced(S.grade);
+    if (!rows.length) {
+      body.innerHTML = '<div class="placeholder">Waiting on the purchasing centre…</div>';
+      return;
+    }
+    var ranked = S.rankBy === 'head' ? E.rankByHeadline(rows) : E.rankQuotes(rows);
+    var cheapestTotal = E.rankQuotes(rows)[0];
+    var stem = ENQ.lines[S.grade].qty;
+
+    var html = '<div class="gridhd">' +
+      '<span class="lbl">#</span><span class="lbl">Vendor</span>' +
+      '<span class="lbl ar">As quoted</span><span class="lbl ar">Total USD/MT</span>' +
+      '<span class="lbl ar">Total ' + qty(stem) + ' MT</span><span class="lbl ar">Expires</span><span></span></div>';
+
+    ranked.forEach(function (r, i) {
+      var dead = isDead(r);
+      var best = S.rankBy === 'true' && i === 0 && !dead;
+      var diff = r.totalPerMt - cheapestTotal.totalPerMt;
+      var open = S.openRow === r.vendorId;
+      var badges = '';
+      if (r.isEstimate) badges += '<span class="badge b-est">Fees estimated</span>';
+      if (r.headlineUnitRaw === '/m³') badges += '<span class="badge b-conv">m³ → MT converted</span>';
+      if (!r.isEstimate && !dead) badges += '<span class="badge b-firm">Firm</span>';
+      if (dead) badges += '<span class="badge b-dead">Expired</span>';
+
+      html += '<div class="qrow' + (best ? ' best' : '') + (dead ? ' dead' : '') + '" data-open="' + open + '" data-v="' + r.vendorId + '">' +
+        '<button class="qrow-main" data-act="toggle" data-v="' + r.vendorId + '">' +
+          '<span class="rank">' + (i + 1) + '</span>' +
+          '<span><span class="vname">' + r.vendor + '</span><span class="vmeta">' + r.note + '</span>' +
+            '<span class="badges">' + badges + '</span></span>' +
+          '<span class="ar headline"><span class="mlbl">As quoted</span>' + money(r.headlinePrice) +
+            '<br><span class="delta">' + r.headlineUnitRaw + '</span></span>' +
+          '<span class="ar"><span class="mlbl">Total USD/MT</span><span class="permt">' + money(r.totalPerMt) + '</span><br>' +
+            '<span class="delta">' + (Math.abs(diff) < .005 ? 'cheapest' : '+' + money(diff)) + '</span></span>' +
+          '<span class="ar total"><span class="mlbl">Total ' + qty(stem) + ' MT</span>' + money(r.totalCost) + '</span>' +
+          '<span class="ar cdwrap"><span class="mlbl">Expires</span>' +
+            '<span class="cd ' + countdownCls(r.validUntil - Date.now()) + '" data-cd="' + r.validUntil + '">' +
+            countdownTxt(r.validUntil - Date.now()) + '</span></span>' +
+          '<span class="caret">▸</span>' +
+        '</button>' + (open ? renderTrail(r, dead) : '') +
+      '</div>';
+    });
+    body.innerHTML = html;
+    wireGrid();
+  }
+
+  function renderTrail(r, dead) {
+    var h = '<div class="trail"><table><thead><tr>' +
+      '<th>Component</th><th>Basis</th><th class="ar">As quoted</th>' +
+      '<th class="ar">USD/MT</th><th class="ar">USD total</th></tr></thead><tbody>';
+    r.trail.forEach(function (t) {
+      var rawAmt = t.basis === 'percentage' ? t.rawAmount + '%'
+        : t.rawCurrency + ' ' + money(t.rawAmount) + (t.basis === 'lumpsum' ? ' LS' : '/' + (t.rawUnit === 'm3' ? 'm³' : 'MT'));
+      h += '<tr><td>' + t.label +
+        (t.rawLabel ? '<span class="rawlbl">“' + t.rawLabel + '”</span>' : '') +
+        (t.isEstimate ? ' <span class="badge b-est">Est</span>' : '') + '</td>' +
+        '<td>' + (t.basis === 'per_unit' ? 'Per unit' : t.basis === 'lumpsum' ? 'Lumpsum' : 'Percentage') +
+        (t.note ? '<span class="note">' + t.note + '</span>' : '') + '</td>' +
+        '<td class="ar q">' + rawAmt + '</td>' +
+        '<td class="ar q">' + money(t.usdPerMt) + '</td>' +
+        '<td class="ar q">' + money(t.usdTotal) + '</td></tr>';
+    });
+    h += '<tr class="sum"><td colspan="3">Total delivered — ' + qty(r.stemMt) + ' MT ' + r.grade + '</td>' +
+      '<td class="ar q">' + money(r.totalPerMt) + '</td><td class="ar q">' + money(r.totalCost) + '</td></tr>';
+    h += '</tbody></table>';
+
+    if (r.unmapped && r.unmapped.length) {
+      h += '<div class="unmapped"><b>Not accounted for in this total:</b> ' +
+        r.unmapped.map(function (u) { return '<code>“' + u + '”</code>'; }).join(', ') +
+        '. Read the source before you commit.</div>';
+    }
+    if (r.isEstimate) {
+      h += '<div class="unmapped"><b>This vendor quoted a base price only.</b> The fees above come from the ' +
+        'Rotterdam fee profile, not from the supplier. Confirm them before quoting this as firm.</div>';
+    }
+    h += '<div class="trail-act">' +
+      '<button class="btn primary" data-act="pick" data-v="' + r.vendorId + '"' + (dead ? ' disabled' : '') + '>' +
+        (dead ? 'Expired — cannot quote' : 'Quote this vendor') + '</button>' +
+      '<button class="btn" data-act="src" data-v="' + r.vendorId + '">View source email</button>' +
+      '<span class="hint" style="align-self:center">Parse confidence ' + Math.round(r.confidence * 100) + '%</span>' +
+    '</div></div>';
+    return h;
+  }
+
+  function renderBasket() {
+    var body = $('gridBody');
+    var grades = ['VLSFO', 'MGO'];
+    var live = {}, anyDead = false;
+    grades.forEach(function (g) {
+      var rows = livePriced(g).filter(function (r) { return !isDead(r); });
+      live[g] = rows.length ? E.rankQuotes(rows) : [];
+    });
+    if (!live.VLSFO.length && !live.MGO.length) {
+      body.innerHTML = '<div class="placeholder">Waiting on the purchasing centre…</div>';
+      return;
+    }
+    var splitTotal = 0, h = '<div class="basket">';
+    grades.forEach(function (g) {
+      var best = live[g][0];
+      if (!best) { h += '<div class="bk"><span class="who">' + g + '</span><span class="hint">no live quote</span></div>'; return; }
+      splitTotal += best.totalCost;
+      h += '<div class="bk"><span class="who">' + g + ' · ' + qty(best.stemMt) + ' MT</span>' +
+        '<span class="fig">' + best.vendor + '</span>' +
+        '<span class="fig">' + money(best.totalPerMt) + '/MT</span>' +
+        '<span class="fig"><b>' + money(best.totalCost) + '</b></span>' +
+        (best.isEstimate ? '<span class="badge b-est">Est</span>' : '<span class="badge b-firm">Firm</span>') + '</div>';
+    });
+
+    /* Single-supplier alternative: cheapest vendor that can cover both grades outright. */
+    var single = null;
+    S.quotes.forEach(function (q) {
+      var a = priceQuote(q, 'VLSFO'), b = priceQuote(q, 'MGO');
+      if (!a || !b || isDead(a) || isDead(b)) return;
+      var t = a.totalCost + b.totalCost;
+      if (!single || t < single.total) single = { vendor: q.name, total: t, est: a.isEstimate || b.isEstimate };
+    });
+
+    h += '<div class="bk"><span class="who">Split across suppliers</span><span class="fig"></span>' +
+      '<span class="fig"></span><span class="fig"><b>' + money(splitTotal) + '</b></span></div>';
+    if (single) {
+      var save = single.total - splitTotal;
+      h += '<div class="bk"><span class="who">Cheapest single supplier — ' + single.vendor + '</span>' +
+        '<span class="fig"></span><span class="fig"></span>' +
+        '<span class="fig"><b>' + money(single.total) + '</b></span></div>';
+      h += '</div><div class="notice"><span>Splitting the stem saves <b>USD ' + money(Math.abs(save)) + '</b> ' +
+        'against the best single supplier — before you weigh a second barge call, a second set of paperwork ' +
+        'and two counterparties on one delivery window. The desk decides; the arithmetic is settled.</span></div>';
+    } else { h += '</div>'; }
+    body.innerHTML = h;
+  }
+
+  function wireGrid() {
+    Array.prototype.forEach.call($('gridBody').querySelectorAll('[data-act]'), function (el) {
+      el.onclick = function (ev) {
+        ev.stopPropagation();
+        var v = el.getAttribute('data-v'), act = el.getAttribute('data-act');
+        if (act === 'toggle') { S.openRow = S.openRow === v ? null : v; renderGrid(); }
+        if (act === 'pick') { S.selected = v; S.sent = null; renderComposer(); $('compPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+        if (act === 'src') {
+          var idx = -1;
+          S.messages.forEach(function (m, i) { if (m.vendorId === v) idx = i; });
+          if (idx >= 0) { S.openMsg = idx; renderFeed(); document.querySelector('.feed').scrollTop = 0; }
+        }
+      };
+    });
+  }
+
+  /* ══ composer ═════════════════════════════════════════════════════════════ */
+
+  function marginedLines() {
+    var q = null;
+    S.quotes.forEach(function (x) { if (x.id === S.selected) q = x; });
+    if (!q) return null;
+    var out = { vendor: q.name, lines: [], cost: 0, sell: 0, margin: 0, est: false, soonest: Infinity };
+    ['VLSFO', 'MGO'].forEach(function (g) {
+      var r = priceQuote(q, g); if (!r) return;
+      var m = E.applyMargin(r.totalPerMt, r.stemMt, S.margin);
+      out.lines.push({ grade: g, spec: ENQ.lines[g].spec, stem: r.stemMt, cost: r.totalPerMt,
+                       sell: m.sellPerMt, marginTotal: m.marginTotal, costTotal: r.totalCost, sellTotal: m.sellTotal });
+      out.cost += r.totalCost; out.sell += m.sellTotal; out.margin += m.marginTotal;
+      if (r.isEstimate) out.est = true;
+      out.soonest = Math.min(out.soonest, r.validUntil);
+    });
+    return out;
+  }
+
+  function quoteText(d) {
+    var t = 'MV NORDIC STAR (IMO 9847213) — Rotterdam (NLRTM)\nDelivery window 15–17 Oct 2026 · Agent: Inchcape Shipping Services\n\n';
+    d.lines.forEach(function (l) {
+      t += l.grade + ' ' + l.spec + '\n' +
+           '  ' + qty(l.stem) + ' MT ±5% MOLOO' + '   USD ' + money(l.sell) + ' / MT\n';
+    });
+    t += '\nDelivered ex-barge. All port charges, wharfage, pumping and sampling\nincluded. Payment 30 days from date of delivery.\n\n';
+    t += 'Total: USD ' + money(d.sell) + '\n\nThis offer is valid 10 minutes from the time of this mail.\n\n';
+    t += 'Best regards,\nDan-Bunkering — Rotterdam desk';
+    return t;
+  }
+
+  function renderComposer() {
+    var panel = $('compPanel'), body = $('compBody');
+    if (!S.selected) { panel.hidden = true; return; }
+    panel.hidden = false;
+    var d = marginedLines();
+    $('compVendor').textContent = 'Back-to-back · ' + d.vendor;
+
+    if (S.sent) {
+      body.innerHTML = '<div class="sent"><span>✓</span><span>Quote sent to Karin Vestergaard at ' +
+        '<b>' + S.sent.time + '</b> — ' + d.lines.length + ' grades, USD ' + money(d.sell) +
+        ', margin USD ' + money(d.margin) + '. Turnaround <b>' + S.sent.elapsed + '</b> from enquiry.</span></div>';
+      return;
+    }
+
+    var warn = d.est
+      ? '<div class="unmapped" style="margin:0 0 13px"><b>This vendor\'s fees are estimated.</b> ' +
+        'Sending this quote commits the desk to a cost the supplier has not confirmed. Confirm the fee ' +
+        'schedule, or quote a firm vendor instead.</div>' : '';
+
+    body.innerHTML =
+      '<div class="comp-grid">' +
+        '<div class="comp-side">' +
+          warn +
+          '<div class="field"><label class="lbl" for="marginBasis">Margin basis</label>' +
+            '<select id="marginBasis">' +
+              '<option value="per_unit">USD per MT</option>' +
+              '<option value="percentage">Percentage of cost</option>' +
+              '<option value="lumpsum">Lumpsum on the stem</option>' +
+            '</select></div>' +
+          '<div class="field"><label class="lbl" for="marginValue">Margin value</label>' +
+            '<input id="marginValue" type="number" step="0.5" value="' + S.margin.value + '"></div>' +
+          d.lines.map(function (l) {
+            return '<div class="figline"><span class="k">' + l.grade + ' cost</span>' +
+              '<span class="v">' + money(l.cost) + '/MT</span></div>' +
+              '<div class="figline"><span class="k">' + l.grade + ' sell</span>' +
+              '<span class="v">' + money(l.sell) + '/MT</span></div>';
+          }).join('') +
+          '<div class="figline"><span class="k">Cost of goods</span><span class="v">' + money(d.cost) + '</span></div>' +
+          '<div class="figline big"><span class="k">Margin</span><span class="v">' + money(d.margin) + '</span></div>' +
+        '</div>' +
+        '<div class="comp-main">' +
+          '<div class="lbl" style="margin-bottom:7px">To: chartering@nordicstarshipping.com · Re: MV NORDIC STAR / Rotterdam</div>' +
+          '<div class="quotebox" id="quoteBox"></div>' +
+          '<div class="trail-act">' +
+            '<button class="btn send" id="btnSend">Send quote — USD ' + money(d.sell) + '</button>' +
+            '<button class="btn" id="btnBack">Pick another vendor</button>' +
+          '</div>' +
+          '<p class="hint" style="margin:9px 0 0">Vendor price behind this quote expires in ' +
+            countdownTxt(d.soonest - Date.now()) + '.</p>' +
+        '</div>' +
+      '</div>';
+
+    $('quoteBox').textContent = quoteText(d);
+    $('marginBasis').value = S.margin.basis;
+    $('marginBasis').onchange = function () {
+      S.margin.basis = this.value;
+      S.margin.value = this.value === 'percentage' ? 2.5 : this.value === 'lumpsum' ? 10000 : 12;
+      renderComposer();
+    };
+    $('marginValue').oninput = function () {
+      var v = parseFloat(this.value); S.margin.value = isNaN(v) ? 0 : v;
+      var dd = marginedLines();
+      $('quoteBox').textContent = quoteText(dd);
+      $('btnSend').textContent = 'Send quote — USD ' + money(dd.sell);
+      renderFigures(dd);
+    };
+    $('btnBack').onclick = function () { S.selected = null; renderComposer(); };
+    $('btnSend').onclick = function () { sendQuote(d); };
+  }
+
+  function renderFigures(d) {
+    var side = document.querySelector('.comp-side');
+    if (!side) return;
+    var lines = side.querySelectorAll('.figline .v');
+    var vals = [];
+    d.lines.forEach(function (l) { vals.push(money(l.cost) + '/MT', money(l.sell) + '/MT'); });
+    vals.push(money(d.cost), money(d.margin));
+    vals.forEach(function (v, i) { if (lines[i]) lines[i].textContent = v; });
+  }
+
+  function sendQuote(d) {
+    var now = new Date();
+    var elapsed = S.started ? countdownTxt(Date.now() - S.started).replace('EXPIRED', '0:00') : '—';
+    S.sent = { time: fmtTime(now), elapsed: elapsed };
+    S.messages.unshift({
+      kind: 'out', from: 'You → Karin Vestergaard', subject: 'Quote — MV NORDIC STAR / Rotterdam',
+      time: fmtTime(now), body: quoteText(d)
+    });
+    renderFeed(); renderComposer();
+  }
+
+  function fmtTime(d) {
+    return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') + ':' +
+           String(d.getSeconds()).padStart(2, '0');
+  }
+
+  /* ══ live parsing of a pasted quote ═══════════════════════════════════════ */
+
+  var samplePromise = (window.claude && window.claude.use)
+    ? window.claude.use('sample').catch(function () { return null; }) : Promise.resolve(null);
+
+  var PARSE_PROMPT =
+'You are parsing a marine bunker fuel quote from a supplier. Extract the price components exactly as written.\n\n' +
+'Reply with ONLY a JSON object of this shape:\n' +
+'{"vendor":"string","basePrice":number,"currency":"USD|EUR|GBP|SGD","priceUnit":"mt|m3",' +
+'"components":[{"label":"string","rawLabel":"string","basis":"per_unit|lumpsum|percentage","amount":number,"currency":"USD","appliesTo":"base|subtotal"}],' +
+'"validMinutes":number,"confidence":0-1,"unmapped":["any phrase you could not turn into a number"]}\n\n' +
+'Rules: basePrice is the product price only, never a fee. A fee stated as a flat sum for the whole delivery ' +
+'is basis "lumpsum"; a fee per tonne or per cubic metre is "per_unit"; a fee stated as a percentage is ' +
+'"percentage" and amount is the number of percent. rawLabel is the supplier\'s own wording. Put anything ' +
+'you could not convert into a number in unmapped. Do not invent fees that are not written.\n\n' +
+'The quote is for GRADE_TOKEN. Quote text:\n\n';
+
+  function pasteParse() {
+    var txt = $('pasteBox').value.trim();
+    var out = $('pasteOut');
+    if (!txt) { out.textContent = 'Paste a quote first.'; return; }
+    var grade = $('pasteGrade').value;
+    $('btnParse').disabled = true;
+    out.innerHTML = '<span class="dot"></span> Claude is reading the quote…';
+
+    samplePromise.then(function (sample) {
+      if (!sample) {
+        $('btnParse').disabled = false;
+        out.textContent = 'Live parsing is not available in this view. The scripted enquiry still runs.';
+        return;
+      }
+      return sample.json(PARSE_PROMPT.replace('GRADE_TOKEN', grade) + txt, { modelTier: 'quick' })
+        .then(function (p) {
+          var vendor = {
+            id: 'pasted-' + Date.now(), name: String(p.vendor || 'Pasted quote'),
+            note: 'Parsed from pasted text', validMin: Number(p.validMinutes) || 10,
+            confidence: typeof p.confidence === 'number' ? p.confidence : .8,
+            subject: 'Pasted vendor quote', body: txt,
+            unmapped: Array.isArray(p.unmapped) ? p.unmapped : [], lines: {}
+          };
+          vendor.lines[grade] = {
+            basePrice: Number(p.basePrice) || 0,
+            currency: p.currency || 'USD',
+            priceUnit: p.priceUnit === 'm3' ? 'm3' : 'mt',
+            baseRawLabel: 'parsed base price',
+            components: (Array.isArray(p.components) ? p.components : []).map(function (c) {
+              return { label: String(c.label || 'Fee'), rawLabel: c.rawLabel ? String(c.rawLabel) : null,
+                       basis: c.basis === 'lumpsum' ? 'lumpsum' : c.basis === 'percentage' ? 'percentage' : 'per_unit',
+                       amount: Number(c.amount) || 0, currency: c.currency || 'USD',
+                       appliesTo: c.appliesTo === 'base' ? 'base' : 'subtotal' };
+            })
+          };
+          vendor.validUntil = Date.now() + vendor.validMin * 60000;
+          if (!S.started) { S.started = Date.now(); $('enqPanel').hidden = false; $('gridPanel').hidden = false; }
+          S.quotes.push(vendor);
+          S.messages.unshift({ kind: 'quote', vendorId: vendor.id, from: vendor.name,
+                               subject: 'Pasted vendor quote', time: fmtTime(new Date()), body: txt });
+          S.grade = grade;
+          syncTabs(); renderFeed(); renderGrid();
+          out.textContent = 'Parsed ' + vendor.name + ' — ' +
+            (vendor.lines[grade].components.length) + ' fee components, now ranked in the grid.';
+          $('pasteBox').value = '';
+        });
+    }).catch(function (e) {
+      var msg = e && e.code === 'not_granted' ? 'Claude access was declined for this page, so pasted quotes cannot be parsed here.'
+        : e && e.code === 'invalid_json' ? 'That reply could not be read as structured data. Try pasting a single vendor at a time.'
+        : e && e.code === 'rate_limited' ? 'Too many parses in a row — give it a moment.'
+        : 'Could not parse that quote. Try a single vendor and a single grade.';
+      out.textContent = msg;
+    }).then(function () { $('btnParse').disabled = false; });
+  }
+
+  /* ══ scenario ═════════════════════════════════════════════════════════════ */
+
+  function syncTabs() {
+    $('tabVLSFO').setAttribute('aria-pressed', S.grade === 'VLSFO');
+    $('tabMGO').setAttribute('aria-pressed', S.grade === 'MGO');
+    $('tabBasket').setAttribute('aria-pressed', S.grade === 'basket');
+    $('rankTrue').setAttribute('aria-pressed', S.rankBy === 'true');
+    $('rankHead').setAttribute('aria-pressed', S.rankBy === 'head');
+  }
+
+  function run() {
+    reset();
+    S.started = Date.now();
+    $('enqPanel').hidden = false; $('gridPanel').hidden = false;
+    $('btnRun').disabled = true;
+    S.messages.unshift({ kind: 'enq', from: CLIENT_MAIL.from, subject: CLIENT_MAIL.subject,
+                         time: fmtTime(new Date()), body: CLIENT_MAIL.body });
+    S.openMsg = 0;
+    renderFeed(); renderGrid();
+
+    VENDORS.forEach(function (v, i) {
+      later(function () {
+        var q = JSON.parse(JSON.stringify(v));
+        q.validUntil = Date.now() + v.validMin * 60000;
+        S.quotes.push(q);
+        S.messages.unshift({ kind: 'quote', vendorId: q.id, from: 'Purchasing centre — ' + q.name,
+                             subject: q.subject, time: fmtTime(new Date()), body: q.body });
+        if (S.openMsg !== null) S.openMsg = S.openMsg + 1;
+        renderFeed(); renderGrid();
+        if (i === VENDORS.length - 1) $('btnRun').disabled = false;
+      }, 1400 + i * 2100);
+    });
+  }
+
+  function reset() {
+    clearTimers();
+    S.started = null; S.messages = []; S.quotes = []; S.openMsg = null; S.openRow = null;
+    S.grade = 'VLSFO'; S.rankBy = 'true'; S.selected = null; S.sent = null;
+    S.margin = { basis: 'per_unit', value: 12 };
+    $('enqPanel').hidden = true; $('gridPanel').hidden = true; $('compPanel').hidden = true;
+    $('btnRun').disabled = false; $('pasteOut').textContent = '';
+    $('sessionClock').textContent = '—:—';
+    syncTabs(); renderFeed(); $('gridBody').innerHTML = ''; renderNotice();
+  }
+
+  /* ══ ticking ══════════════════════════════════════════════════════════════ */
+
+  setInterval(function () {
+    if (S.started) {
+      var el = Date.now() - S.started, s = Math.floor(el / 1000);
+      $('sessionClock').textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+    }
+    var cds = document.querySelectorAll('[data-cd]');
+    var flipped = false;
+    Array.prototype.forEach.call(cds, function (el) {
+      var ms = Number(el.getAttribute('data-cd')) - Date.now();
+      var txt = countdownTxt(ms);
+      if (el.textContent !== txt) {
+        if (ms <= 0 && !el.classList.contains('crit')) flipped = true;
+        el.textContent = txt; el.className = 'cd ' + countdownCls(ms);
+      }
+    });
+    if (flipped) renderGrid();
+  }, 1000);
+
+  /* ══ wiring ═══════════════════════════════════════════════════════════════ */
+
+  $('btnRun').onclick = run;
+  $('btnReset').onclick = reset;
+  $('btnParse').onclick = pasteParse;
+  $('tabVLSFO').onclick = function () { S.grade = 'VLSFO'; S.openRow = null; syncTabs(); renderGrid(); };
+  $('tabMGO').onclick = function () { S.grade = 'MGO'; S.openRow = null; syncTabs(); renderGrid(); };
+  $('tabBasket').onclick = function () { S.grade = 'basket'; syncTabs(); renderGrid(); };
+  $('rankTrue').onclick = function () { S.rankBy = 'true'; syncTabs(); renderNotice(); renderGrid(); };
+  $('rankHead').onclick = function () { S.rankBy = 'head'; syncTabs(); renderNotice(); renderGrid(); };
+
+  /* Open in a working state rather than an empty shell. */
+  renderFeed(); syncTabs(); run();
+})();
+</script>
